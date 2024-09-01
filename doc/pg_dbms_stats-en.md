@@ -34,25 +34,25 @@ On the mechanism, inaccuracy of statisctics or sudden change of data
 amount or distribution lets the query optimizer make unexpected or
 unwanted change of execution plan.
 
-pg_dbms_stats is a extension that try to stabilize execution plan
+pg_dbms_stats is an extension that try to stabilize execution plan
 avoiding such kind of disturbance. It tries to stabilize planning by
 providing predefined "dummy" statistics instead of original values for
 requests from the planner. It is intended to be used by those who want
-to lower the risk that a unexpected change of execution plan leands to
+to lower the risk that an unexpected change of execution plan leads to
 bad performance degradation on a system.
 
 pg_dbms_stats can fix the statistics of the following database objects.
 
 -   Ordinary tables
--   Idexes (having a restriction except for function indexes)
+-   Indexes (having a restriction except for function indexes)
 -   Foreign tables(PG9.2 and later)
--   Materialied views
+-   Materialized views
 
 ## DESCRIPTION
 
-There are eight kind of operations pg_dbms_stats offers for manipulating
+There are eight kinds of operations pg_dbms_stats offers for manipulating
 statistics used by planner. All operations other than export are
-executed via SQL functions。See [TARGET OBEJCT LIST](objects-en.md)
+executed via SQL functions. See [TARGET OBEJCT LIST](objects-en.md)
 for details.
 
 ### BACKUP
@@ -64,7 +64,7 @@ USAGE
 - Execute the SQL function backup\_\<restore_unit\>\_stats()
 
 DETAILS  
-- The objects to store their statistics are specified by the unit of the whole databsae, schema, table and column. For example, specify the schema when you want to store the statistics of all tables and columns in a schema. To keep things simple, it would be a good practice to specify the target objects in rather large sized unit like database or schema.
+- The objects to store their statistics are specified by the unit of the whole databsase, schema, table and column. For example, specify the schema when you want to store the statistics of all tables and columns in a schema. To keep things simple, it would be a good practice to specify the target objects in rather large sized unit like database or schema.
 
 The backup history is seen in dbms_stats.backup_history table. The details are seen in [TABLES](objects-en.md#table).
 
@@ -77,10 +77,10 @@ USAGE
 - Execute SQL functions restore_stats() or restore\_\<restore_unit\>\_stats()
 
 DETAILS  
-- Resotore a backuped statistics for the specified objects. Planner continues to see the same statistics for others. There are following two ways to specify a backup.
+- Restore a backuped statistics for the specified objects. Planner continues to see the same statistics for others. There are following two ways to specify a backup.
 
 - Backup ID
-    - By invoking the function restore_stats() with a backup ID, the backup with the ID is restored. It is the simplest way to restore a whole backup when you take backups in units of database or schema. The backup ID is unique within a database so make sure use a backup ID of the right database.
+    - By invoking the function restore_stats() with a backup ID, the backup with the ID is restored. It is the simplest way to restore a whole backup when you take backups in units of database or schema. The backup ID is unique within a database so make sure to use a backup ID of the right database.
 - Object type and timestamp
     - By invoking the SQL function restore\_\<restore_unit\>\_stats() with a timestamp, the statistics of the all objects in the specfied unit are restored from the latest backup of each object before the specified time. Planner sees the "real" statistics for the objects that don't have a backup before the time. This method is useful when you are taking statistics backups by smaller units and it is difficult to identify a set of backup IDs to restore the status at a certain time.
 - Restore implies "lock" of statistics. No need of explicit lock of statitics after restoration.
@@ -88,7 +88,7 @@ DETAILS
 ### PURGE
 
 DESCRIPTION  
-- Performs a bulk deletion of backups no longer necessary. All backups taken before the speccified backup ID are deleted.
+- Performs a bulk deletion of backups no longer necessary. All backups taken before the specified backup ID are deleted.
 
 USAGE  
 - Execute the SQL function purge_stats() with a backup ID.
@@ -116,12 +116,12 @@ USAGE
 - Execute the SQL function unlock\_\<unlock unit\>\_stats() with the name of the target unit.
 
 DETAILS  
-- Planner uses the "real" statitics stored in pg_class and pg_statistic for an object after unlocking of the object. The unlock unit is one of database, schema table and column. Unlock is allowed to execute with arbitrary unit unrelated to the unit specified as of locking.
+- Planner uses the "real" statistics stored in pg_class and pg_statistic for an object after unlocking of the object. The unlock unit is one of database, schema table and column. Unlock is allowed to execute with arbitrary unit unrelated to the unit specified as of locking.
 
 ### CLEANUP
 
 DESCRIPTION  
-- Remove all locked statistics of objects no longer exisrts.
+- Remove all locked statistics of objects no longer exist.
 
 USAGE  
 - Execute the SQL function clean_up_stats()
@@ -141,7 +141,7 @@ DETAILS
 - Choose one of plain or effective according to the purpose. The output directory must be writable by the user which is running the server.
 
 - The "real" statistics of PostgreSQL  
-    - The statistics stored in pg_class and pg_statistics. This is usable for off-site analysis and tuning of a server. The exported statistics can be loaded using pg_dbms_stats on the analysing site.
+    - The statistics stored in pg_class and pg_statistic. This is usable for off-site analysis and tuning of a server. The exported statistics can be loaded using pg_dbms_stats on the analysing site.
 - The statitics currently in effect  
     - The statistics that planner is looking through pg_dbms_stats. It is usable for loading a tuned statistics onto the service site or backing up an effective statitics into a plain file.
 - You can find the sample files in the "extension" subdirectory in the directory shown by "pg_config --docdir".
@@ -176,13 +176,13 @@ Drop it manually if no longer needed.
 
 ### LOADING pg_dbms_stats
 
-pg_dbms_stats is dynamically loadable using LOAD command. If you want
+pg_dbms_stats is dynamically loadable using LOAD command. If you want to
 enable pg_dbms_stats automatically in all sessions, add "pg_dbms_stats"
 to shared_preload_libraries in postgresql.conf then restart the server.
 
 **CAVEAT**: You will see the following lines in the log file for every
 statement by just loading pg_dbms_stats but not registering as an
-extension on the database. Make sure regstering on the database before
+extension on the database. Make sure to register on the database before
 you load pg_dbms_stats.
 
     test=# SELECT * FROM test;
@@ -213,7 +213,7 @@ config, or use ALTER SYSTEM for PG9.4 or later.
 ## UNINSTALLATION
 
 Perform the following steps to uninstall pg_dbms_stats. *dbname* is the
-name of the databases on which pg_dbms_stats is regsistered as an
+name of the databases on which pg_dbms_stats is registered as an
 extension.
 
 1.  Type "make uninstall" in the build directory as the installation
@@ -225,7 +225,7 @@ extension.
 
 ## USAGE EXAMPLES
 
-There are roughly three kind of operation styles. Mainly-backing-up,
+There are roughly three kinds of operation styles. Mainly-backing-up,
 mainly-locking, mainly-exporting. Assume mainly-backup style if you are
 not sure which one of them fits your requirement.
 
@@ -319,7 +319,7 @@ command](http://www.postgresql.jp/document/current/html/sql-copy.html) for detai
 
 ## RESTRICTIONS
 
-There are some important poins and restrictions to use pg_dbms_stats.
+There are some important points and restrictions to use pg_dbms_stats.
 
 Prerequisites  
 - Make sure that the target objects have statistics before performing lock or backup of pg_dbms_stats. The operations in the case don't work as expected although you won't have no error message.
@@ -333,7 +333,7 @@ Timing of statistics backup
 Other factors of planning change  
 - Since this tool stores only statistics, despite of statistics locking the planner's behavior may change by settings of several [GUC paremeters](http://www.postgresql.jp/document/current/html/runtime-config-query.html) that affect planning or significant change of the density of a relation.
 
-Possible hook confclicts  
+Possible hook conflicts  
 - Since pg_dbms_stats uses the following hook points it might conflict with tools that uses the same hook points.
 
     -   get_relation_info_hook
